@@ -29,10 +29,11 @@
 #include "storage/bufmgr.h"
 #include "storage/predicate.h"
 #include "tcop/tcopprot.h"
+#include "utils/builtins.h"
 #include "utils/datum.h"
 #include "utils/memutils.h"
 #include "utils/rel.h"
-#include "utils/builtins.h"
+#include "utils/typcache.h"
 
 
 /* Magic numbers for parallel state sharing */

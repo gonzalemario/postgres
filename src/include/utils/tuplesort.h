@@ -21,8 +21,6 @@
 #ifndef TUPLESORT_H
 #define TUPLESORT_H
 
-#include "access/brin_tuple.h"
-#include "access/gin_tuple.h"
 #include "access/itup.h"
 #include "executor/tuptable.h"
 #include "storage/dsm.h"
@@ -30,6 +28,10 @@
 #include "utils/relcache.h"
 #include "utils/sortsupport.h"
 
+
+/* We don't want this file to depend on AM-specific header files */
+typedef struct BrinTuple BrinTuple;
+typedef struct GinTuple GinTuple;
 
 /*
  * Tuplesortstate and Sharedsort are opaque types whose details are not

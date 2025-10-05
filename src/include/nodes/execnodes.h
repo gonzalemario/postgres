@@ -29,8 +29,10 @@
 #ifndef EXECNODES_H
 #define EXECNODES_H
 
+#include "access/skey.h"
 #include "access/tupconvert.h"
 #include "executor/instrument.h"
+#include "executor/instrument_node.h"
 #include "fmgr.h"
 #include "lib/ilist.h"
 #include "lib/pairingheap.h"
@@ -1817,19 +1819,6 @@ typedef struct BitmapIndexScanState
 } BitmapIndexScanState;
 
 /* ----------------
- *	 BitmapHeapScanInstrumentation information
- *
- *		exact_pages		   total number of exact pages retrieved
- *		lossy_pages		   total number of lossy pages retrieved
- * ----------------
- */
-typedef struct BitmapHeapScanInstrumentation
-{
-	uint64		exact_pages;
-	uint64		lossy_pages;
-} BitmapHeapScanInstrumentation;
-
-/* ----------------
  *	 SharedBitmapState information
  *
  *		BM_INITIAL		TIDBitmap creation is not yet started, so first worker
@@ -1864,20 +1853,6 @@ typedef struct ParallelBitmapHeapState
 	SharedBitmapState state;
 	ConditionVariable cv;
 } ParallelBitmapHeapState;
-
-/* ----------------
- *	 Instrumentation data for a parallel bitmap heap scan.
- *
- * A shared memory struct that each parallel worker copies its
- * BitmapHeapScanInstrumentation information into at executor shutdown to
- * allow the leader to display the information in EXPLAIN ANALYZE.
- * ----------------
- */
-typedef struct SharedBitmapHeapInstrumentation
-{
-	int			num_workers;
-	BitmapHeapScanInstrumentation sinstrument[FLEXIBLE_ARRAY_MEMBER];
-} SharedBitmapHeapInstrumentation;
 
 /* ----------------
  *	 BitmapHeapScanState information
