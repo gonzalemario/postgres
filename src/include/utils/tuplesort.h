@@ -24,6 +24,7 @@
 #include "access/brin_tuple.h"
 #include "access/gin_tuple.h"
 #include "access/itup.h"
+#include "executor/instrument_node.h"
 #include "executor/tuptable.h"
 #include "storage/dsm.h"
 #include "utils/logtape.h"
@@ -73,22 +74,8 @@ typedef struct SortCoordinateData *SortCoordinate;
  * different methods, so we need a separate bit for each one.  Keep the
  * NUM_TUPLESORTMETHODS constant in sync with the number of bits!
  */
-typedef enum
-{
-	SORT_TYPE_STILL_IN_PROGRESS = 0,
-	SORT_TYPE_TOP_N_HEAPSORT = 1 << 0,
-	SORT_TYPE_QUICKSORT = 1 << 1,
-	SORT_TYPE_EXTERNAL_SORT = 1 << 2,
-	SORT_TYPE_EXTERNAL_MERGE = 1 << 3,
-} TuplesortMethod;
 
 #define NUM_TUPLESORTMETHODS 4
-
-typedef enum
-{
-	SORT_SPACE_TYPE_DISK,
-	SORT_SPACE_TYPE_MEMORY,
-} TuplesortSpaceType;
 
 /* Bitwise option flags for tuple sorts */
 #define TUPLESORT_NONE					0
@@ -107,13 +94,6 @@ typedef enum
  * bump allocator.
  */
 #define TupleSortUseBumpTupleCxt(opt) (((opt) & TUPLESORT_ALLOWBOUNDED) == 0)
-
-typedef struct TuplesortInstrumentation
-{
-	TuplesortMethod sortMethod; /* sort algorithm used */
-	TuplesortSpaceType spaceType;	/* type of space spaceUsed represents */
-	int64		spaceUsed;		/* space consumption, in kB */
-} TuplesortInstrumentation;
 
 /*
  * The objects we actually sort are SortTuple structs.  These contain
