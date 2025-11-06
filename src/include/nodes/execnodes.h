@@ -29,6 +29,7 @@
 #ifndef EXECNODES_H
 #define EXECNODES_H
 
+#include "access/skey.h"
 #include "access/tupconvert.h"
 #include "executor/instrument.h"
 #include "fmgr.h"

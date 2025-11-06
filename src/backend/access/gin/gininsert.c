@@ -33,6 +33,7 @@
 #include "utils/memutils.h"
 #include "utils/rel.h"
 #include "utils/builtins.h"
+#include "utils/typcache.h"
 
 
 /* Magic numbers for parallel state sharing */
