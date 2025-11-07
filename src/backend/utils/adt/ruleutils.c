@@ -585,7 +585,7 @@ pg_get_role_ddl_internal(Oid roleid)
 		return NIL;
 
 	roleform = (Form_pg_authid) GETSTRUCT(tuple);
-	rolname = NameStr(roleform->rolname);
+	rolname = pstrdup(NameStr(roleform->rolname));
 
 	/*
 	 * We don't support generating DDL for system roles.  The primary reason
@@ -777,6 +777,7 @@ pg_get_role_ddl_internal(Oid roleid)
 	table_close(rel, AccessShareLock);
 
 	pfree(buf.data);
+	pfree(rolname);
 
 	return statements;
 }
