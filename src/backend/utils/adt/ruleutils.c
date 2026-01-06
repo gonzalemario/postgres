@@ -578,7 +578,6 @@ pg_get_role_ddl_internal(Oid roleid)
 	SysScanDesc scan;
 	HeapTuple	setting_tuple;
 	List	   *statements = NIL;
-	const char *separator = " ";
 
 	tuple = SearchSysCache1(AUTHOID, ObjectIdGetDatum(roleid));
 	if (!HeapTupleIsValid(tuple))
@@ -605,25 +604,25 @@ pg_get_role_ddl_internal(Oid roleid)
 	 * you'd typically write them in a CREATE ROLE command, though any order
 	 * is actually acceptable to the parser.
 	 */
-	appendStringInfo(&buf, "%s%s", separator,
-					 roleform->rolcanlogin ? "LOGIN" : "NOLOGIN");
-
-	appendStringInfo(&buf, "%s%s", separator,
+	appendStringInfo(&buf, " %s",
 					 roleform->rolsuper ? "SUPERUSER" : "NOSUPERUSER");
 
-	appendStringInfo(&buf, "%s%s", separator,
+	appendStringInfo(&buf, " %s",
 					 roleform->rolcreatedb ? "CREATEDB" : "NOCREATEDB");
 
-	appendStringInfo(&buf, "%s%s", separator,
+	appendStringInfo(&buf, " %s",
 					 roleform->rolcreaterole ? "CREATEROLE" : "NOCREATEROLE");
 
-	appendStringInfo(&buf, "%s%s", separator,
+	appendStringInfo(&buf, " %s",
 					 roleform->rolinherit ? "INHERIT" : "NOINHERIT");
 
-	appendStringInfo(&buf, "%s%s", separator,
+	appendStringInfo(&buf, " %s",
+					 roleform->rolcanlogin ? "LOGIN" : "NOLOGIN");
+
+	appendStringInfo(&buf, " %s",
 					 roleform->rolreplication ? "REPLICATION" : "NOREPLICATION");
 
-	appendStringInfo(&buf, "%s%s", separator,
+	appendStringInfo(&buf, " %s",
 					 roleform->rolbypassrls ? "BYPASSRLS" : "NOBYPASSRLS");
 
 	/*
@@ -631,8 +630,8 @@ pg_get_role_ddl_internal(Oid roleid)
 	 * meaning no limit).
 	 */
 	if (roleform->rolconnlimit >= 0)
-		appendStringInfo(&buf, "%sCONNECTION LIMIT %d",
-						 separator, roleform->rolconnlimit);
+		appendStringInfo(&buf, " CONNECTION LIMIT %d",
+						 roleform->rolconnlimit);
 
 	rolevaliduntil = SysCacheGetAttr(AUTHOID, tuple,
 									 Anum_pg_authid_rolvaliduntil,
@@ -646,8 +645,8 @@ pg_get_role_ddl_internal(Oid roleid)
 		if (timestamp2tm(rolevaliduntil, NULL, &tm, &fsec, NULL, NULL) == 0)
 		{
 			EncodeDateTime(&tm, fsec, false, 0, "UTC", USE_ISO_DATES, ts_str);
-			appendStringInfo(&buf, "%sVALID UNTIL %s",
-							 separator, quote_literal_cstr(ts_str));
+			appendStringInfo(&buf, " VALID UNTIL %s",
+							 quote_literal_cstr(ts_str));
 		}
 	}
 
