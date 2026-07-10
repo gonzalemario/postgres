@@ -679,31 +679,23 @@ transformInsertSetClause(ParseState *pstate, List *setClauseList,
 {
 	List	   *all_cols = NIL;		/* List of all unique column names */
 	List	   *valuesLists = NIL;
-	ListCell   *outer_lc;
-	ListCell   *lc;
 
 	/*
 	 * First pass: collect all unique column names from all rows.
 	 * We need to scan all rows first to determine the complete set of columns.
 	 * Also check for duplicate columns within each row.
 	 */
-	foreach(outer_lc, setClauseList)
+	foreach_node(List, set_clause, setClauseList)
 	{
-		List	   *set_clause = (List *) lfirst(outer_lc);
 		List	   *row_cols = NIL;		/* Columns seen in this row */
-		ListCell   *set_lc;
 
-		foreach(set_lc, set_clause)
+		foreach_node(ResTarget, res, set_clause)
 		{
-			ResTarget  *res = (ResTarget *) lfirst(set_lc);
 			bool		found = false;
-			ListCell   *col_lc;
 
 			/* Check for duplicate column in the same row */
-			foreach(col_lc, row_cols)
+			foreach_node(ResTarget, row_col, row_cols)
 			{
-				ResTarget  *row_col = (ResTarget *) lfirst(col_lc);
-
 				if (strcmp(row_col->name, res->name) == 0)
 				{
 					ereport(ERROR,
@@ -718,10 +710,8 @@ transformInsertSetClause(ParseState *pstate, List *setClauseList,
 			row_cols = lappend(row_cols, res);
 
 			/* Check if we've already seen this column name across all rows */
-			foreach(col_lc, all_cols)
+			foreach_node(ResTarget, existing, all_cols)
 			{
-				ResTarget  *existing = (ResTarget *) lfirst(col_lc);
-
 				if (strcmp(existing->name, res->name) == 0)
 				{
 					found = true;
@@ -747,23 +737,18 @@ transformInsertSetClause(ParseState *pstate, List *setClauseList,
 	 * Second pass: for each row, create a values list matching the column order
 	 * from all_cols. Use DEFAULT for any columns not present in this row.
 	 */
-	foreach(outer_lc, setClauseList)
+	foreach_node(List, set_clause, setClauseList)
 	{
-		List	   *set_clause = (List *) lfirst(outer_lc);
 		List	   *vals = NIL;
 
 		/* For each column in the complete column list */
-		foreach(lc, all_cols)
+		foreach_node(ResTarget, col, all_cols)
 		{
-			ResTarget  *col = (ResTarget *) lfirst(lc);
 			bool		found = false;
-			ListCell   *set_lc;
 
 			/* Search for this column in the current row */
-			foreach(set_lc, set_clause)
+			foreach_node(ResTarget, res, set_clause)
 			{
-				ResTarget  *res = (ResTarget *) lfirst(set_lc);
-
 				if (strcmp(col->name, res->name) == 0)
 				{
 					/* Found it - use the provided value */
